@@ -1,6 +1,7 @@
 import csv
 import tensorflow as tf
 from tensorflow.contrib import learn
+# Script for Titanic.
 
 def ReadData(filename):
 	with open(filename, newline='') as csvfile:
