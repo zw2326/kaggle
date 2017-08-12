@@ -28,6 +28,7 @@ def FormatData(data):
 		data[key] = [0 if x == '' else float(x) for x in data[key]]
 
 	### DEBUG ###
+	print(','.join(data.keys()))
 	for i in range(5):
 		print(','.join([str(data[x][i]) for x in data.keys()]))
 
