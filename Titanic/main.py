@@ -2,68 +2,61 @@ import csv
 import tensorflow as tf
 from tensorflow.contrib import learn
 
-def ReadDataFile(filename):
+def ReadData(filename):
 	with open(filename, newline='') as csvfile:
 		spamreader = csv.reader(csvfile, delimiter=',', quotechar='"')
 		for i, row in enumerate(spamreader):
 			if i == 0:
-				res = {j: [] for j, x in enumerate(row)}
+				res = {x: [] for x in row}
+				ind2col = {j: x for j, x in enumerate(row)} # map column index to column name
 				continue
 			for j, col in enumerate(row):
-				res[j].append(col)
-	print('========== {0} loaded.'.format(filename))
+				res[ind2col[j]].append(col)
+	print('========== Data read.'.format(filename))
 	return res
 
-def FormatTrainData(data):
+def FormatData(data):
 	# male -> 1, female -> 0
-	data[4] = [1 if x == 'male' else 0 for x in data[4]]
+	data['Sex'] = [1 if x == 'male' else 0 for x in data['Sex']]
 	# Embark port -> sum of ascii
-	data[11] = [sum([ord(x) for x in a]) for a in data[11]]
-	# Remove cabin column (10)
-	del data[10]
-	# Remove ticket column (8)
-	del data[8]
-	# Remove name column (3)
-	del data[3]
+	data['Embarked'] = [sum([ord(x) for x in a]) for a in data['Embarked']]
+	del data['Cabin']
+	del data['Ticket']
+	del data['Name']
 
 	for key in data.keys():
 		data[key] = [0 if x == '' else float(x) for x in data[key]]
 
+	### DEBUG ###
 	for i in range(5):
 		print(','.join([str(data[x][i]) for x in data.keys()]))
 
+	print('========== Data formatted.')
+	return data
+
+def FormatTrainData(data):
+	data = FormatData(data)
+
 	# Separate xTrain and yTrain
-	yTrain = data[1]
-	del data[1]
-	print('========== Train data formatted.')
+	yTrain = data['Survived']
+	del data['Survived']
 	return [data, yTrain]
 
 def FormatTestData(data):
-	# male -> 1, female -> 0
-	data[3] = [1 if x == 'male' else 0 for x in data[3]]
-	# Embark port -> sum of ascii
-	data[10] = [sum([ord(x) for x in a]) for a in data[10]]
-	# Remove cabin column (9)
-	del data[9]
-	# Remove ticket column (7)
-	del data[7]
-	# Remove name column (2)
-	del data[2]
-
-	for key in data.keys():
-		data[key] = [0 if x == '' else float(x) for x in data[key]]
-
-	print('========== Test data formatted.')
+	data = FormatData(data)
 	return data
 
-def AssembleResult(xTest, yTest):
-	print('========== Result assembled.')
-	return [[str(int(xTest[i])), str(int(yTest[i]))] for i in range(len(xTest))]
+def ReadTrainData(filename):
+	return FormatTrainData(ReadData(filename))
 
-def WriteDataFile(data, filename):
+def ReadTestData(filename):
+	return FormatTestData(ReadData(filename))
+
+def WriteData(xTest, yTest, filename):
+	res = [[str(int(xTest['PassengerId'])), str(int(yTest[i]))] for i in range(len(xTest))]
 	with open(filename, 'w') as csvfile:
 		csvfile.write('PassengerId,Survived')
-		for row in data:
+		for row in res:
 			csvfile.write('\n{0},{1}'.format(row[0], row[1]))
 	print('========== {0} dumped.'.format(filename))
 
@@ -77,13 +70,9 @@ def Train(xTrain, yTrain, xTest):
 
 
 if __name__ == '__main__':
-	trainData = ReadDataFile('train.csv')
-	xTrain, yTrain = FormatTrainData(trainData)
-
-	testData = ReadDataFile('test.csv')
-	xTest = FormatTestData(testData)
+	xTrain, yTrain = ReadTrainData('train.csv')
+	xTest = ReadTestData('test.csv')
 
 	yTest = Train(xTrain, yTrain, xTest)
-	
-	resultData = AssembleResult(xTest, yTest)
-	WriteDataFile(resultData)
+
+	WriteData(xTest, yTest, 'output.csv')
