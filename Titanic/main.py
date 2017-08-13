@@ -12,8 +12,8 @@ nSelfTest = 100
 def FormatData(data):
 	# male -> 1, female -> 0
 	data['Sex'] = [1 if x == 'male' else 0 for x in data['Sex']]
-	# bp()
 
+	# bp()
 	### data['Embarked'] = [sum(ord(x) for x in a) for a in data['Embarked']]
 
 	### classMap = lambda x: float(ord('Z') - ord(x))
@@ -22,7 +22,7 @@ def FormatData(data):
 	### data['Ticket'] = [sum(ord(x) * i for i, x in enumerate(a)) for a in data['Ticket']]
 	# bp()
 
-	del data['Pclass']
+	# del data['Pclass']
 	del data['Name']
 	del data['Age'] # many rows do not have it and we cannot guess
 	del data['Ticket']
