@@ -1,5 +1,7 @@
 import csv
+import numpy as np
 import tensorflow as tf
+from pdb import set_trace as bp
 from tensorflow.contrib import learn
 # Script for Titanic.
 
@@ -55,7 +57,7 @@ def ReadTestData(filename):
 	return FormatTestData(ReadData(filename))
 
 def WriteData(xTest, yTest, filename):
-	res = [[str(int(xTest['PassengerId'])), str(int(yTest[i]))] for i in range(len(xTest))]
+	res = [[str(int(xTest['PassengerId'][i])), str(int(yTest[i]))] for i in range(len(xTest['PassengerId']))]
 	with open(filename, 'w') as csvfile:
 		csvfile.write('PassengerId,Survived')
 		for row in res:
@@ -64,9 +66,12 @@ def WriteData(xTest, yTest, filename):
 
 def Train(xTrain, yTrain, xTest):
 	nClasses = 2
-	classifier = learn.LinearClassifier(feature_columns=[tf.contrib.layers.real_valued_column("", dimension=len(xTrain.keys()))], n_classes=nClasses)
-	classifier.fit(xTrain, yTrain, steps=100)
-	yTest = classifier.predict(xTest)
+	xTrainTf = np.array([xTrain[col] for col in sorted(set(xTrain.keys()) - set(['PassengerId']))]).T
+	yTrainTf = np.array([yTrain]).T
+	xTestTf = np.array([xTest[col] for col in sorted(set(xTest.keys()) - set(['PassengerId']))]).T
+	classifier = learn.LinearClassifier(feature_columns=[tf.contrib.layers.real_valued_column("", dimension=len(xTrainTf))], n_classes=nClasses)
+	classifier.fit(xTrainTf, yTrainTf, steps=100)
+	yTest = [y for y in classifier.predict(xTestTf)]
 	print('========== Trained.')
 	return yTest
 
