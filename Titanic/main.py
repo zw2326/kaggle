@@ -109,4 +109,4 @@ if __name__ == '__main__':
 		xyTrain = ReadData('train.csv')
 		xTest = ReadData('test.csv')
 		yTestResult = Train(xyTrain, xTest)
-		WriteData(xTest, yTestResult, 'output.csv')
+		WriteData(xTest, yTestResult, 'main-output.csv')
